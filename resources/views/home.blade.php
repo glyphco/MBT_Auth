@@ -68,13 +68,35 @@ html, body {
 <body>
 	<div class="flex-center position-ref full-height">
 		<div class="content">
-			<div class="title m-b-md">Laravel Social Login</div>
-			<div class="links">
-				<a href="redirect/facebook">Login in with Facebook</a> <a
-					href="redirect/google">Login in with Google +</a> <a
-					href="redirect/twitter">Login in with Twitter</a> <a
-					href="redirect/github">Login in with Github</a>
+			@if($service == 'facebook')
+			<div class="title m-b-md">
+				Welcome {{ $details->user['name']}} ! <br> Your email is : {{
+				$details->user['email'] }} <br> You are {{ $details->user['gender']
+				}}.
 			</div>
+			@endif @if($service == 'google')
+			<div class="title m-b-md">
+				Welcome {{ $details->name}} ! <br> Your email is : {{
+				$details->email }} <br> Your are {{ $details->user['gender'] }}.
+			</div>
+
+			@endif @if($service == 'twitter')
+			<div class="title m-b-md">
+				Welcome {{ $details->name}} ! <br> Your username is : {{
+				$details->nickname }}<br> Total Tweets : {{
+				$details->user['statuses_count']}}<br> Followers : {{
+				$details->user['followers_count']}}<br> Following : {{
+				$details->user['friends_count']}}
+			</div>
+			@endif @if($service == 'github')
+			<div class="title m-b-md">
+				Welcome {{ $details->user['name'] }} ! <br> Your email is : {{
+				$details->user['email'] }} <br> Public Repositories :
+				{{$details->user['public_repos']}}<br> Followers :
+				{{$details->user['followers']}}
+			</div>
+
+			@endif
 		</div>
 	</div>
 </body>
