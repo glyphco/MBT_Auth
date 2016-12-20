@@ -1,38 +1,53 @@
-<?php
+<?php namespace App\Http\Controllers;
 
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Socialite;
+use Illuminate\Http\Request;
 use Redirect;
+use Socialite;
 
-class SocialAuthController extends Controller {
+class SocialAuthController extends Controller
+{
 
-   protected $request;
+    protected $request;
 
-   public function __construct(\Illuminate\Http\Request $request)
-   {
-       $this->request = $request;
-   }
+    public function __construct(\Illuminate\Http\Request $request)
+    {
+        $this->request = $request;
+    }
 
-	public function redirect($service) {
-		return Socialite::driver ( $service )->stateless()->redirect();
-	}
+    public function redirect($service)
+    {
+        //return Socialite::driver($service)->stateless()->redirect();
+        //Not using stateless in this case to optionally include the
+        //Authenticator alias (used for authenticatior disambiguation)
+        $this->setAlias('AROLOGIN');
+        return Socialite::driver($service)->redirect();
+    }
 
-	public function callback($service) {
-	$request = $this->request->all();
+    public function callback($service)
+    {
 
-	if (array_key_exists('doit', $request)) {
-		$user = Socialite::driver($service)->userFromToken($request['token']);
-		return view ( 'home' )->withDetails ( $user )->withService ( $service );
-	}
+        //$user = Socialite::with($service)->stateless()->user();
+        //Not using stateless in this case to optionally include the
+        //Authenticator alias (used for authenticatior disambiguation)
+        $alias = $this->getAlias();
+        $user  = Socialite::with($service)->user();
 
-$user = Socialite::with ( $service )->stateless()->user ();
+//get token through guzzle (todo) (for now redirect to auth server)
+        $authserver = env('AUTH_SERVER', 'http://mbtweb.dev');
+        $away       = $authserver . '/gettoken/' . $service . '?alias=' . $alias . '&token=' . $user->token;
 
-	$away = 'http://mbtweb.dev/callback/'.$service.'?doit&token='.$user['token'];
+        return redirect()->away($away);
+    }
 
-	return redirect()->away($away);
+    private function setAlias($alias)
+    {
+        $this->request->session()->put('company_alias', $alias);
+    }
 
-	}
+    private function getAlias()
+    {
+        return $this->request->session()->get('company_alias', 'VANILLA');
+    }
+
 }
