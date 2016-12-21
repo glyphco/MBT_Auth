@@ -13,8 +13,4 @@
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/redirect/{service}', 'SocialAuthController@redirect');
-Route::get('/callback/{service}', 'SocialAuthController@callback');
 Route::get('/gettoken/{service}', 'JWTAuthController@gettoken');
-Route::get('/test', 'TestController@test');
-//Route::get ( '/servetoken/{service}', 'JWTController@gettoken' );
