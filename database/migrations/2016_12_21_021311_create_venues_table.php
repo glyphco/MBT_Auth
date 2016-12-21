@@ -19,6 +19,9 @@ class CreateVenuesTable extends Migration {
 			$table->string('city_state');
 			$table->string('zipcode');
 			$table->string('phone');
+
+			$table->timestamps();
+
 		});
 	}
 
