@@ -47,8 +47,14 @@ class JWTAuthController extends Controller
             $user->save();
         }
 
-        $JWT = JWTAuth::fromUser($user);
+        //$token = $this->guard()->attempt($credentials);
 
+        //dd($token);
+
+        //$JWT = JWTAuth::fromUser($user);
+
+        $JWT = JWTAuth::fromUser($user);
+        dd($JWT);
         return response()->json(compact('JWT'));
 
     }
