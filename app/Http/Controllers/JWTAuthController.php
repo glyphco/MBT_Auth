@@ -8,55 +8,62 @@ use Illuminate\Http\Request;
 use JWTAuth;
 use Socialite;
 
-class JWTAuthController extends Controller
-{
+class JWTAuthController extends Controller {
 
-    protected $request;
-    protected $user;
+	protected $request;
+	protected $user;
 
-    public function __construct(\Illuminate\Http\Request $request, User $user)
-    {
-        $this->request = $request;
-        $this->user    = $user;
-    }
+	public function __construct(\Illuminate\Http\Request $request, User $user) {
+		$this->request = $request;
+		$this->user = $user;
+	}
 
-    public function gettoken($service)
-    {
-        $request        = $this->request->all();
-        $socialize_user = Socialite::driver($service)->userFromToken($request['token']);
+	public function gettoken($service) {
+		$request = $this->request->all();
+		$socialize_user = Socialite::driver($service)->userFromToken($request['token']);
 
-        //Used for authenticator disambiguation
-        //$company_alias  = $request['alias'];
+		//Used for authenticator disambiguation
+		//$company_alias  = $request['alias'];
 
-        //Holder for the service ID field in the Database (ex: facebook_id)
-        $service_ID = $service . '_id';
+		//Holder for the service ID field in the Database (ex: facebook_id)
+		$service_ID = $service . '_id';
 
-        //tie in the user model
-        $user = User::where($service_ID, $socialize_user->getId())->first();
+		//tie in the user model
+		$user = User::where($service_ID, $socialize_user->getId())->first();
 
-        // register (if no user)
-        if (!$user) {
-            $user = new $this->user;
-            $fill = [
-                $service_ID => $socialize_user->getId(),
-                'name'      => $socialize_user->getName(),
-                'email'     => $socialize_user->getEmail(),
-                'avatar'    => $socialize_user->getAvatar(),
-            ];
-            $user = $user->fill($fill);
-            $user->save();
-        }
+		// register (if no user)
+		if (!$user) {
+			$user = $this->resisterUser($service, $socialize_user);
+		}
 
-        //$token = $this->guard()->attempt($credentials);
+		$JWT = JWTAuth::fromUser($user);
+		return response()->json(compact('JWT'));
+	}
 
-        //dd($token);
+	private function resisterUser($service, $socialize_user) {
 
-        //$JWT = JWTAuth::fromUser($user);
+		env('AUTOCONFIRMUSER', 0);
+		$service_ID = $service . '_id';
+		$user = new $this->user;
+		$fill = [
+			$service_ID => $socialize_user->getId(),
+			'name' => $socialize_user->getName(),
+			'email' => $socialize_user->getEmail(),
+			'avatar' => $socialize_user->getAvatar(),
+			'confirmed' => env('AUTOCONFIRMUSER', 0),
+		];
+		if ($this->isglyph($service, $socialize_user)) {
+			$fill['confirmed'] = 1;
+		}
+		$user = $user->fill($fill);
+		$user->save();
+		return $user;
+	}
 
-        $JWT = JWTAuth::fromUser($user);
-        dd($JWT);
-        return response()->json(compact('JWT'));
-
-    }
-
+	private function isglyph($service, $socialize_user) {
+		if (env('glyph_' . $service, 0) == $socialize_user->getId()) {
+			return true;
+		}
+		return false;
+	}
 }
