@@ -15,11 +15,11 @@ class JWTAuthController extends Controller {
 
 	public function __construct(\Illuminate\Http\Request $request, User $user) {
 		$this->request = $request;
-		$this->user = $user;
+		$this->user    = $user;
 	}
 
 	public function gettoken($service) {
-		$request = $this->request->all();
+		$request        = $this->request->all();
 		$socialize_user = Socialite::driver($service)->userFromToken($request['token']);
 
 		//Used for authenticator disambiguation
@@ -44,14 +44,33 @@ class JWTAuthController extends Controller {
 
 		env('AUTOCONFIRMUSER', 0);
 		$service_ID = $service . '_id';
-		$user = new $this->user;
-		$fill = [
+		$user       = new $this->user;
+		$fill       = [
 			$service_ID => $socialize_user->getId(),
-			'name' => $socialize_user->getName(),
-			'email' => $socialize_user->getEmail(),
-			'avatar' => $socialize_user->getAvatar(),
+			'name'      => $socialize_user->getName(),
+			'email'     => $socialize_user->getEmail() ?? $socialize_user->getId() . '@' . $service . '.com',
+			'avatar'    => $socialize_user->getAvatar(),
 			'confirmed' => env('AUTOCONFIRMUSER', 0),
 		];
+
+//use Validator;
+		// $validator = Validator::make($input, $rules);
+
+		// if ($validator->fails()) {
+		//     return response([
+		//         'error'   => true,
+		//         'message' => "Could not save.",
+		//         'errors'  => $validator->messages()],
+		//         422
+		//     );
+
+		//  $this->validate($fill, [
+		//      $service_ID => 'required',
+		//      'name' => 'required',
+		// 'email' => 'required',
+		// 'avatar' => 'required',
+		//  ]);
+
 		if ($this->isglyph($service, $socialize_user)) {
 			$fill['confirmed'] = 1;
 		}
