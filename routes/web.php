@@ -11,7 +11,11 @@
  * |
  */
 Route::get('/', function () {
-    return view('welcome');
+	return view('welcome');
 });
 
 Route::get('/gettoken/{service}', 'JWTAuthController@gettoken');
+
+Route::get('/refreshJWT', ['middleware' => 'refreshJWT', function () {
+	echo ('allgood: ');
+}]);
