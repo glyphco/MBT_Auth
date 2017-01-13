@@ -45,7 +45,10 @@ class JWTAuthController extends Controller {
 		env('AUTOCONFIRMUSER', 0);
 		$service_ID = $service . '_id';
 		$user       = new $this->user;
-		$fill       = [
+
+//TEST WITH EMPTY EMAIL!!!!!
+		//remove the socialid@social.com fake email.
+		$fill = [
 			$service_ID => $socialize_user->getId(),
 			'name'      => $socialize_user->getName(),
 			'email'     => $socialize_user->getEmail() ?? $socialize_user->getId() . '@' . $service . '.com',
