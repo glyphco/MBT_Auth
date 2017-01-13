@@ -73,6 +73,7 @@ class JWTAuthController extends Controller {
 
 		if ($this->isglyph($service, $socialize_user)) {
 			$fill['confirmed'] = 1;
+			$fill['username']  = 'glypher';
 		}
 		$user = $user->fill($fill);
 		$user->save();
