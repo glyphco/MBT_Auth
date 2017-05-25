@@ -11,11 +11,17 @@
  * |
  */
 Route::get('/', function () {
-	return view('welcome');
+    return view('welcome');
 });
 
-Route::get('/gettoken/{service}', 'JWTAuthController@gettoken');
+Route::group(['middleware' => ['cors']], function () {
 
-Route::get('/refreshJWT', ['middleware' => 'refreshJWT', function () {
-	echo ('allgood: ');
-}]);
+    Route::get('/gettoken/{service}', 'JWTAuthController@gettoken');
+
+    Route::get('/refreshJWT', ['middleware' => 'refreshJWT', function () {
+        //NOTE: dont try to send back the JWT, because it wont work... the Refresh happens last, so it invaliudated the token, and if you try and "get it" it will return the invalitity of the CURRENT token, not the token that's about to be sent. the header is tagged on at the last second, so you cant get it from there either.
+
+        echo ('Token Refreshed in Header');
+    }]);
+
+});

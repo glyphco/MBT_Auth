@@ -32,6 +32,7 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
+
         parent::report($exception);
     }
 
@@ -44,6 +45,49 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\BadRequestHttpException) {
+            if ($exception->getMessage() == 'Token not provided') {
+                $message  = $exception->getMessage();
+                $response = [
+                    'code'    => 401,
+                    'status'  => 'error',
+                    'data'    => 'Token Not Provided (Code#exception32)',
+                    'message' => $message,
+                ];
+                return response()->json($response, $response['code']);
+            }
+        }
+
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException) {
+            if ($request->expectsJson()) {
+                $code    = (string) 400;
+                $message = $exception->getMessage();
+
+                $error[] = [
+                    'status' => '401',
+                    'code'   => 'exception232',
+                    'source' => ["pointer" => "unauthenticated login handler"],
+                    'title'  => $message,
+                    'detail' => 'Must supply a valid token',
+                ];
+                $response = [
+                    'errors' => $error,
+                ];
+                $contenttype = 'application/vnd.api+json';
+                return response()->json($response, $code)->header('Content-Type', $contenttype);
+            }
+
+            $message  = $exception->getMessage();
+            $response = [
+                'code'    => 401,
+                'status'  => 'error',
+                'data'    => 'Must supply a valid token (Code#exception32)',
+                'message' => $message,
+            ];
+            return response()->json($response, $response['code']);
+        }
+
         return parent::render($request, $exception);
     }
 
