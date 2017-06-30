@@ -17,6 +17,7 @@ Route::get('/', function () {
 Route::group(['middleware' => ['cors']], function () {
 
     //register
+    Route::post('/Register', 'LocalAuthController@register');
     //login
     //verify
     //resendemail
