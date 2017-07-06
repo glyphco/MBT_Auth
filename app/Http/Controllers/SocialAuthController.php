@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use JWTAuth;
 use Socialite;
 
-class JWTAuthController extends Controller
+class SocialAuthController extends Controller
 {
 
     protected $request;
