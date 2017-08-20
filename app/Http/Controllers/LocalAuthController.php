@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendVerificationEmail;
 use App\Models\User;
 use App\Traits\APIResponderTrait;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
@@ -51,6 +52,9 @@ class LocalAuthController extends Controller
                 throw new \Exception("ValidationException");
             }
             $data = $this->create($request->all());
+            if (!(env('AUTOCONFIRMUSER', false))) {
+                dispatch(new SendVerificationEmail($data));
+            }
             return $this->createdResponse($data);
         } catch (\Exception $ex) {
             $data = ['form_validations' => $v->errors(), 'exception' => $ex->getMessage()];
@@ -130,10 +134,11 @@ class LocalAuthController extends Controller
     protected function create(array $data)
     {
         return \App\Models\User::create([
-            'name'      => $data['name'],
-            'email'     => $data['email'],
-            'password'  => bcrypt($data['password']),
-            'confirmed' => env('AUTOCONFIRMUSER', false),
+            'name'        => $data['name'],
+            'email'       => $data['email'],
+            'password'    => bcrypt($data['password']),
+            'email_token' => base64_encode($data['email']),
+            'confirmed'   => env('AUTOCONFIRMUSER', false),
         ]);
     }
 
@@ -150,4 +155,15 @@ class LocalAuthController extends Controller
         return 'email';
     }
 
+    public function verifyemail($token)
+    {
+        $user = User::where('email_token', $token)->first();
+
+        $user->confirmed = 1;
+
+        if ($user->save()) {
+            return $this->showResponse('confirmed');
+        }
+
+    }
 }

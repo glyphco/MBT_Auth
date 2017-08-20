@@ -25,6 +25,7 @@ Route::group(['middleware' => ['cors']], function () {
     Route::post('/emailcheck', 'LocalAuthController@emailcheck');
     Route::post('/login', 'LocalAuthController@login');
     //verify
+    Route::get('/verifyemail/{token}', 'LocalAuthController@verifyemail');
     //resendemail
     //logout
 
