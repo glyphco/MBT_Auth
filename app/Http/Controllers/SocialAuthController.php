@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Traits\APIResponderTrait;
 use Illuminate\Http\Request;
 use JWTAuth;
 use Socialite;
 
 class SocialAuthController extends Controller
 {
-
+    use APIResponderTrait;
     protected $request;
     protected $user;
 
@@ -37,6 +38,11 @@ class SocialAuthController extends Controller
         // register (if no user)
         if (!$user) {
             $user = $this->resisterUser($service, $socialize_user);
+        }
+
+        // Check B&
+        if ($user->is_banned) {
+            return $this->reasonedUnauthorizedResponse('banned until: ' . $user->banned_until);
         }
 
         $JWT = JWTAuth::fromUser($user);
